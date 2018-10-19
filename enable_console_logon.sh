@@ -17,8 +17,8 @@
 params=$#
 
 # 対象RAMユーザー(handson**)の指定
-TARGET=$1
-PASSWORD=$2
+TARGET="handson"
+PASSWORD=$1
 
 # ====================================================
 # Usage
@@ -43,7 +43,7 @@ exit 1
 # Check params
 # ====================================================
 function check_params () {
-  if [ $1 != 2 ]; then
+  if [ $1 != 1 ]; then
     usage
   fi
   return 0
