@@ -14,8 +14,8 @@ jobs:
             chmod +x /bin/jq
 
             # ソースコードの取得、aliyun-cli環境準備
-            git clone ${REPOSITORY_URL}
-            cd ${REPOSITORY_NAME}
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
+            cd ${CIRCLE_PROJECT_REPONAME}
             aliyun configure set --mode AK --region ${REGION} --access-key-id ${ACCESS_KEY_ID} --access-key-secret ${ACCESS_KEY_SECRET}
 
             # コマンドの実行
