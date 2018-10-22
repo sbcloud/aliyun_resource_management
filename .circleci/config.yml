@@ -11,8 +11,8 @@ jobs:
             cd ${CIRCLE_PROJECT_REPONAME}
 
             # aliyun-cli, jq, aliyun cli profileの準備
-            tar -xzvf ./lib/aliyun-cli-linux-3.0.4-amd64.tgz -C /bin/
-            mv ./lib/jq /bin/
+            tar -xzvf ./library/aliyun-cli-linux-3.0.4-amd64.tgz -C /bin/
+            mv ./library/jq /bin/
             aliyun configure set --mode AK --region ${REGION} --access-key-id ${ACCESS_KEY_ID} --access-key-secret ${ACCESS_KEY_SECRET}
 
             # コマンドの実行
