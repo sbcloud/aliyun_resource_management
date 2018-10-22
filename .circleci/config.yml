@@ -7,18 +7,15 @@ jobs:
       - run:
           name: Deployment
           command: |
-            ## aliyun-cli, jq
-            wget -O /tmp/aliyun-cli.tgz http://aliyun-cli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-3.0.4-amd64.tgz
-            tar -xzvf /tmp/aliyun-cli.tgz -C /bin/
-            wget http://stedolan.github.io/jq/download/linux64/jq -P /bin
-            chmod +x /bin/jq
-
-            # ソースコードの取得、aliyun-cli環境準備
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
             cd ${CIRCLE_PROJECT_REPONAME}
+
+            # aliyun-cli, jq, aliyun cli profileの準備
+            tar -xzvf ./lib/aliyun-cli-linux-3.0.4-amd64.tgz -C /bin/
+            mv ./lib/jq /bin/
             aliyun configure set --mode AK --region ${REGION} --access-key-id ${ACCESS_KEY_ID} --access-key-secret ${ACCESS_KEY_SECRET}
 
             # コマンドの実行
-            if [ ${SHELL} == "enable_console_logon.sh" ];then /bin/bash ${SHELL} ${PARAMS} ${PASSWORD_STRING}; fi
+            if [ ${SHELL} == "enable_console_logon.sh" ];then /bin/bash ${SHELL} ${PASSWORD_STRING}; fi
             if [ ${SHELL} == "disable_console_logon.sh" ];then /bin/bash ${SHELL}; fi
             if [ ${SHELL} == "delete_resource_all.sh" ];then /bin/bash ${SHELL} ${REGION} ${ASSUME_ROLE_ARN}; fi
