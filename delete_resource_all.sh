@@ -153,7 +153,7 @@ function detach_policy_delete_keys () {
 
       for policy in ${_policies[@]}; do
          echo ${policy}
-         cmd="aliyun ram DetachPolicyFromUser ${assume_role_info} --UserName ${user} --PolicyType Custom --PolicyName ${policy}"
+         cmd="aliyun ram DetachPolicyFromUser ${assume_role_info} --UserName ${user} --PolicyType System --PolicyName ${policy}"
          echo ${cmd}
          ${cmd} || throws_error
       done
