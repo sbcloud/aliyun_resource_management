@@ -196,7 +196,7 @@ function delete_oss() {
     # OSS Objectの削除
     for object in ${objects[@]}; do
       echo ${object}
-      aliyun oss rm ${object} ${assume_role_info}
+      aliyun oss rm "${object}" ${assume_role_info}
     done
 
     delete_oss_bucket="aliyun oss rm -f -b ${bucket} ${assume_role_info}"
