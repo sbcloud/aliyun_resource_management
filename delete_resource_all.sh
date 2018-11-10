@@ -408,12 +408,12 @@ fi
 # ------------------------------------------
 # RAM Policy/Aceess Key/User
 # ------------------------------------------
-if [ ${#UserNames[@]} -eq 0 ]; then
-  echo "[Info] No UserNames!"
-else
-  #detach_policy_delete_keys ${UserNames[@]} || throws_error
-  #delete_resource "user_name" ${UserNames[@]} || throws_error
-fi
+#if [ ${#UserNames[@]} -eq 0 ]; then
+#  echo "[Info] No UserNames!"
+#else
+#  detach_policy_delete_keys ${UserNames[@]} || throws_error
+#  delete_resource "user_name" ${UserNames[@]} || throws_error
+#fi
 
 # ------------------------------------------
 # Delete OSS Bucket
