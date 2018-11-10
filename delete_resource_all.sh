@@ -95,7 +95,7 @@ function assume_role() {
 
   _role_arn=$1
 
-  _response=`aliyun sts AssumeRole --RoleArn ${_role_arn} --RoleSessionName "training"`
+  _response=`aliyun sts AssumeRole --RoleArn ${_role_arn} --RoleSessionName "training" || throws_error`
   _access_key_id=`echo ${_response} | jq -r ".Credentials.AccessKeyId"`
   _access_key_secret=`echo ${_response} | jq -r ".Credentials.AccessKeySecret"`
   _security_token=`echo ${_response} | jq -r ".Credentials.SecurityToken"`
@@ -148,7 +148,7 @@ function detach_policy_delete_keys () {
   echo "------------------------------------------"
   echo "下記のコマンドが実行されました"
   for user in ${user_info[@]}; do
-      # policy削除
+      # policyデタッチ
       _policies=`aliyun ram ListPoliciesForUser --UserName ${user} ${assume_role_info} | jq -r '.Policies.Policy[].PolicyName'`
 
       for policy in ${_policies[@]}; do
@@ -175,8 +175,6 @@ function detach_policy_delete_keys () {
 
 
 # ====================================================
-# TODO: refactoring
-#  OSSコマンドの外出
 # Delect OSS Bucket
 # ====================================================
 function delete_oss() {
@@ -189,14 +187,28 @@ function delete_oss() {
 
   # OSS Bucketの削除
   for bucket in ${oss_buckets[@]}; do
-
-    tmp=`aliyun oss ls ${bucket} ${assume_role_info} | awk -F ' ' '{print $8}'`
+    ###########[ Important Info] ###################################################
+    # 下記の例のような object名にスペースが入っている場合
+    # objectsをそのままechoすると、データがおかしくなるため
+    # 一旦sedでスペースを「＊」に置き換え、【OSS Objectの削除】で 「＊」をスペースに戻す
+    # [例]
+    #  テスト結果 10 01.png → テスト結果*10*01.png → テスト結果 10 01.png
+    #  ----------------------------------------
+    ################################################################################
+    tmp=`aliyun oss ls ${bucket} ${assume_role_info} | awk -F "${bucket}" '{print $2}' | sed 's/ /*/g'`
     objects=(`echo ${tmp}`)
 
     # OSS Objectの削除
     for object in ${objects[@]}; do
-      echo ${object}
-      aliyun oss rm "${object}" ${assume_role_info}
+      ###########[ Important Info] #################################################
+      # 下記の例のような object名にスペースが入っている場合
+      # sedでスペースを「＊」に置き換えらたobject名をもとに戻す
+      # [例]
+      # テスト結果 10 01.png → テスト結果*10*01.png → テスト結果 10 01.png
+      #                      ----------------------------------------
+      #############################################################################
+      object=`echo ${object} | sed 's/*/ /g'`
+      aliyun oss rm "${bucket}${object}" ${assume_role_info}
     done
 
     delete_oss_bucket="aliyun oss rm -f -b ${bucket} ${assume_role_info}"
@@ -248,7 +260,6 @@ CMD["user_name"]="aliyun ram DeleteUser ${assume_role_info} --UserName "
 
 
 #対象リソース情報取得
-#() となしの場合の動きは要確認
 VpnConnectionIds=(`aliyun vpc DescribeVpnConnections ${assume_role_info} | jq -r ".VpnConnections.VpnConnection[].VpnConnectionId"`)
 CustomerGatewayIds=(`aliyun vpc DescribeCustomerGateways ${assume_role_info} | jq -r ".CustomerGateways.CustomerGateway[].CustomerGatewayId"`)
 VpnGateways=(`aliyun vpc DescribeVpnGateways ${assume_role_info} |
@@ -283,37 +294,13 @@ else
   delete_resource "vpn_connection" ${VpnConnectionIds[@]} || throws_error
 fi
 
-# ------------------------------------------
+# ------------------------------------------z
 # CustomerGateway
 # ------------------------------------------
 if [ ${#CustomerGatewayIds[@]} -eq 0 ]; then
   echo "[Info] No CustomerGatewayIds!"
 else
   delete_resource "customer_gateway" ${CustomerGatewayIds[@]} || throws_error
-fi
-
-# ------------------------------------------
-# ECS
-# ------------------------------------------
-# TODO
-# instance削除後、DescribeInstancesでは取得できなくなるが、
-# 裏ではしばらく残るため、security groupをすぐに削除できない
-# 暫定対応: sleep 10s
-
-if [ ${#InstanceIds[@]} -eq 0 ]; then
-  echo "[Info] No InstanceIds!"
-else
-  delete_resource "ecs_instance" ${InstanceIds[@]} || throws_error
-  sleep 20s
-fi
-
-# ------------------------------------------
-# RDS
-# ------------------------------------------
-if [ ${#DBInstanceIds[@]} -eq 0 ]; then
-  echo "[Info] No RDS DBinstance!"
-else
-  delete_resource "db_instance" ${DBInstanceIds} || throws_error
 fi
 
 # ------------------------------------------
@@ -325,7 +312,7 @@ else
   delete_resource "vpn_gateway" ${VpnGateways[@]} || throws_error
 fi
 
-# リファクタリング
+# TODO:リファクタリング
 flag=0
 while [ ${flag} = 0 ]
 do
@@ -337,6 +324,21 @@ do
     sleep 5s
   fi
 done
+
+# ------------------------------------------
+# ECS
+# ------------------------------------------
+# TODO
+# instance削除後、DescribeInstancesでは取得できなくなるが、
+# 裏ではしばらく残るため、security groupをすぐに削除できない
+# 暫定対応: sleep 20s
+
+if [ ${#InstanceIds[@]} -eq 0 ]; then
+  echo "[Info] No InstanceIds!"
+else
+  delete_resource "ecs_instance" ${InstanceIds[@]} || throws_error
+  sleep 20s
+fi
 
 # ------------------------------------------
 # ECS Image
@@ -354,6 +356,15 @@ if [ ${#SnapshotIds[@]} -eq 0 ]; then
   echo "[Info] No SnapshotIds!"
 else
   delete_resource "snapshot" ${SnapshotIds[@]} || throws_error
+fi
+
+# ------------------------------------------
+# RDS
+# ------------------------------------------
+if [ ${#DBInstanceIds[@]} -eq 0 ]; then
+  echo "[Info] No RDS DBinstance!"
+else
+  delete_resource "db_instance" ${DBInstanceIds} || throws_error
 fi
 
 # ------------------------------------------
@@ -400,8 +411,8 @@ fi
 if [ ${#UserNames[@]} -eq 0 ]; then
   echo "[Info] No UserNames!"
 else
-  detach_policy_delete_keys ${UserNames[@]} || throws_error
-  delete_resource "user_name" ${UserNames[@]} || throws_error
+  #detach_policy_delete_keys ${UserNames[@]} || throws_error
+  #delete_resource "user_name" ${UserNames[@]} || throws_error
 fi
 
 # ------------------------------------------
