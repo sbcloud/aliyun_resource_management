@@ -136,27 +136,18 @@ function delete_resource () {
 # ====================================================
 # Detach policy from user
 # ====================================================
-function detach_policy_delete_keys () {
+function delete_keys () {
   # $0 : shell process
   # $1 : service name
   # $2 ~ : ram user
 
-  echo "=============== detach_policy_delete_keys ${1} ==============="
+  echo "=============== delete_keys ${1} ==============="
   declare -A user_info
   user_info=${@:1}
 
   echo "------------------------------------------"
   echo "下記のコマンドが実行されました"
   for user in ${user_info[@]}; do
-      # policyデタッチ
-      _policies=`aliyun ram ListPoliciesForUser --UserName ${user} ${assume_role_info} | jq -r '.Policies.Policy[].PolicyName'`
-
-      for policy in ${_policies[@]}; do
-         echo ${policy}
-         cmd="aliyun ram DetachPolicyFromUser ${assume_role_info} --UserName ${user} --PolicyType System --PolicyName ${policy}"
-         echo ${cmd}
-         ${cmd} || throws_error
-      done
 
       # access_key削除
       _access_keys=`aliyun ram ListAccessKeys ${assume_role_info} --UserName ${user} | jq -r ".AccessKeys.AccessKey[].AccessKeyId"`
@@ -256,7 +247,6 @@ CMD["vswitch"]="aliyun vpc DeleteVSwitch ${assume_role_info} --VSwitchId "
 CMD["vpc"]="aliyun vpc DeleteVpc ${assume_role_info} --VpcId "
 CMD["slb"]="aliyun slb DeleteLoadBalancer ${assume_role_info} --LoadBalancerId "
 CMD["access_key"]="aliyun ram DeleteAccessKey ${assume_role_info} --UserAccessKeyId "
-CMD["user_name"]="aliyun ram DeleteUser ${assume_role_info} --UserName "
 
 
 #対象リソース情報取得
@@ -406,14 +396,13 @@ fi
 
 
 # ------------------------------------------
-# RAM Policy/Aceess Key/User
+# RAM Aceess Key
 # ------------------------------------------
-#if [ ${#UserNames[@]} -eq 0 ]; then
-#  echo "[Info] No UserNames!"
-#else
-#  detach_policy_delete_keys ${UserNames[@]} || throws_error
-#  delete_resource "user_name" ${UserNames[@]} || throws_error
-#fi
+if [ ${#UserNames[@]} -eq 0 ]; then
+  echo "[Info] No UserNames!"
+else
+  delete_keys ${UserNames[@]} || throws_error
+fi
 
 # ------------------------------------------
 # Delete OSS Bucket
