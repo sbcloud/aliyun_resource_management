@@ -247,7 +247,7 @@ CMD["vswitch"]="aliyun vpc DeleteVSwitch ${assume_role_info} --VSwitchId "
 CMD["vpc"]="aliyun vpc DeleteVpc ${assume_role_info} --VpcId "
 CMD["slb"]="aliyun slb DeleteLoadBalancer ${assume_role_info} --LoadBalancerId "
 CMD["access_key"]="aliyun ram DeleteAccessKey ${assume_role_info} --UserAccessKeyId "
-CMD["eip"]="aliyun vpc ReleaseEipAddress --Force true ${assume_role_info} --EipAddressesId"
+CMD["eip"]="aliyun vpc ReleaseEipAddress ${assume_role_info} --EipAddressesId"
 
 
 #対象リソース情報取得
