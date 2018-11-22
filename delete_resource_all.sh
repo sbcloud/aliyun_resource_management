@@ -6,7 +6,7 @@
 #  To delete the following resouces on Alibaba Cloud
 #    vpn_connection, customer_gateway, vpn_gateway
 #    ecs_instance, ecs_image, snapshot, security_group
-#    db_instance, vswitch, vpc, slb, user_name(ram user), oss_buckets, eip
+#    db_instance, vswitch, vpc, slb, access_key(ram user), oss_buckets, eip
 #
 # Usage:
 #  $ ./delete_resource.sh <region> <role_arn>
@@ -414,9 +414,9 @@ delete_oss || throws_error
 # ------------------------------------------
 # EIP Adresses
 # ------------------------------------------
-if [ ${#EipAddressesId[@]} -eq 0 ]; then
+if [ ${#EipAddressesIds[@]} -eq 0 ]; then
   echo "[Info] No EIP Adresses!"
 else
-  Release_EipAddress ${ReleaseEipAddress[@]} || throws_error
+  delete_resource "eip" ${EipAddressesIds[@]} || throws_error
 fi
 
