@@ -6,7 +6,7 @@
 #  To delete the following resouces on Alibaba Cloud
 #    vpn_connection, customer_gateway, vpn_gateway
 #    ecs_instance, ecs_image, snapshot, security_group
-#    db_instance, vswitch, vpc, slb, user_name(ram user), oss_buckets
+#    db_instance, vswitch, vpc, slb, user_name(ram user), oss_buckets, eip
 #
 # Usage:
 #  $ ./delete_resource.sh <region> <role_arn>
@@ -247,6 +247,7 @@ CMD["vswitch"]="aliyun vpc DeleteVSwitch ${assume_role_info} --VSwitchId "
 CMD["vpc"]="aliyun vpc DeleteVpc ${assume_role_info} --VpcId "
 CMD["slb"]="aliyun slb DeleteLoadBalancer ${assume_role_info} --LoadBalancerId "
 CMD["access_key"]="aliyun ram DeleteAccessKey ${assume_role_info} --UserAccessKeyId "
+CMD["eip"]="aliyun vpc ReleaseEipAddress --Force true ${assume_role_info} --EipAddressesId"
 
 
 #対象リソース情報取得
@@ -266,6 +267,7 @@ VpcIds=(`aliyun vpc DescribeVpcs ${assume_role_info} | jq -r '.Vpcs.Vpc[] | if .
 LoadBalancerIds=(`aliyun slb DescribeLoadBalancers ${assume_role_info} | jq -r '.LoadBalancers.LoadBalancer[].LoadBalancerId'`)
 PoliciesForUser=(`aliyun ram ListPolicies | jq -r '.Policies.Policy[] | if .PolicyType == "Custom" then .PolicyName else empty end'`)
 UserNames=(`aliyun ram ListUsers ${assume_role_info} | jq -r '.Users.User[].UserName'`)
+EipAddressesIds=(`aliyun vpc DescribeEipAddresses ${assume_role_info} | jq -r ".EipAddresses.EipAddress[].EipAddressesId"`)
 
 
 # --------------------------------------------------------------
@@ -408,3 +410,13 @@ fi
 # Delete OSS Bucket
 # ------------------------------------------
 delete_oss || throws_error
+
+# ------------------------------------------
+# EIP Adresses
+# ------------------------------------------
+if [ ${#EipAddressesId[@]} -eq 0 ]; then
+  echo "[Info] No EIP Adresses!"
+else
+  Release_EipAddress ${ReleaseEipAddress[@]} || throws_error
+fi
+
