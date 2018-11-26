@@ -267,7 +267,7 @@ VpcIds=(`aliyun vpc DescribeVpcs ${assume_role_info} | jq -r '.Vpcs.Vpc[] | if .
 LoadBalancerIds=(`aliyun slb DescribeLoadBalancers ${assume_role_info} | jq -r '.LoadBalancers.LoadBalancer[].LoadBalancerId'`)
 PoliciesForUser=(`aliyun ram ListPolicies | jq -r '.Policies.Policy[] | if .PolicyType == "Custom" then .PolicyName else empty end'`)
 UserNames=(`aliyun ram ListUsers ${assume_role_info} | jq -r '.Users.User[].UserName'`)
-AllocationIds=(`aliyun vpc DescribeEipAddresses ${assume_role_info} | jq -r ".EipAddresses.EipAddress[].EipAddressesId"`)
+AllocationIds=(`aliyun vpc DescribeEipAddresses ${assume_role_info} | jq -r ".EipAddresses.EipAddress[].AllocationId"`)
 
 
 # --------------------------------------------------------------
