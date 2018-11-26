@@ -247,7 +247,7 @@ CMD["vswitch"]="aliyun vpc DeleteVSwitch ${assume_role_info} --VSwitchId "
 CMD["vpc"]="aliyun vpc DeleteVpc ${assume_role_info} --VpcId "
 CMD["slb"]="aliyun slb DeleteLoadBalancer ${assume_role_info} --LoadBalancerId "
 CMD["access_key"]="aliyun ram DeleteAccessKey ${assume_role_info} --UserAccessKeyId "
-CMD["eip"]="aliyun vpc ReleaseEipAddress ${assume_role_info} --EipAddressesId"
+CMD["eip"]="aliyun vpc ReleaseEipAddress ${assume_role_info} --EipAddressesId "
 
 
 #対象リソース情報取得
@@ -396,6 +396,14 @@ else
   delete_resource "slb" ${LoadBalancerIds[@]} || throws_error
 fi
 
+# ------------------------------------------
+# EIP Adresses
+# ------------------------------------------
+if [ ${#EipAddressesIds[@]} -eq 0 ]; then
+  echo "[Info] No EIP Adresses!"
+else
+  delete_resource "eip" ${EipAddressesIds[@]} || throws_error
+fi
 
 # ------------------------------------------
 # RAM Aceess Key
@@ -410,13 +418,3 @@ fi
 # Delete OSS Bucket
 # ------------------------------------------
 delete_oss || throws_error
-
-# ------------------------------------------
-# EIP Adresses
-# ------------------------------------------
-if [ ${#EipAddressesIds[@]} -eq 0 ]; then
-  echo "[Info] No EIP Adresses!"
-else
-  delete_resource "eip" ${EipAddressesIds[@]} || throws_error
-fi
-
