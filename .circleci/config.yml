@@ -7,7 +7,7 @@ jobs:
       - run:
           name: Deployment
           command: |
-            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
+            git clone -b ${CIRCLE_BRANCH} https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
             cd ${CIRCLE_PROJECT_REPONAME}
 
             # aliyun-cli, jq, aliyun cli profileの準備
