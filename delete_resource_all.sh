@@ -124,7 +124,7 @@ function delete_resource () {
   echo "下記のコマンドが実行されました"
   for resource in ${resource_info[@]}; do
       # 例: aliyun ecs DeleteSnapshot --SnapshotId ${resource}
-      echo ${CMD["$1"]} ${resource}
+      #echo ${CMD["$1"]} ${resource}
       ${CMD["$1"]} ${resource} || throws_error
       echo "実行完了!"
   done
