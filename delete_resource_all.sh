@@ -153,7 +153,7 @@ function delete_keys () {
       _access_keys=`aliyun ram ListAccessKeys ${assume_role_info} --UserName ${user} | jq -r ".AccessKeys.AccessKey[].AccessKeyId"`
       for access_key in ${_access_keys[@]}; do
         cmd="aliyun ram DeleteAccessKey ${assume_role_info} --UserName ${user} --UserAccessKeyId ${access_key}"
-        echo ${cmd}
+        #echo ${cmd}
         ${cmd} || throws_error
       done
 
@@ -204,7 +204,7 @@ function delete_oss() {
 
     delete_oss_bucket="aliyun oss rm -f -b ${bucket} ${assume_role_info}"
     echo "下記のコマンドが実行されました"
-    echo ${delete_oss_bucket}
+    #echo ${delete_oss_bucket}
     ${delete_oss_bucket}
     echo "実行完了!"
 
