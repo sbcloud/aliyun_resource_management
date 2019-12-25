@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 対応プロダクト:  VPC(VPC,VSwitch,VPN,SSL-VPN,NAT,EIP), ECS, RDS, SLB, RAM
+
 for r in `aliyun vpc DescribeRegions  | jq -r -c ".Regions.Region[].RegionId"`; do
   echo -n "#### Region: ";
   aliyun vpc DescribeRegions --AcceptLanguage ja | jq -r -c ".Regions.Region[] | select(.RegionId | test( \"$r\") ) |[.RegionId, .LocalName] "
